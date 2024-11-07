@@ -21,16 +21,21 @@ def get_first_paragraph(wikipedia_url, session: Session):
     print(wikipedia_url) 
     wiki_content = session.get(wikipedia_url)
     html_content = BeautifulSoup(wiki_content.text, 'html.parser')
-    name = html_content.find("h1").text[0]
+    name = html_content.find("h1", class_="firstHeading mw-first-heading").text[0]
     paragraphs = html_content.find_all('p')
     for p in paragraphs:
         if p.get_text().__contains__(name):
-            first_paragraph = p.get_text()
-            first_paragraph = re.sub(r"\[\d+\]", "", first_paragraph)
-            first_paragraph = re.sub(r"\[\w+\]", "", first_paragraph)
-            first_paragraph = re.sub(r"\[.+\]", "", first_paragraph)
-            print(first_paragraph)
-            break
+            if not p.find_parent("div", class_="bandeau-cell"):                
+                first_paragraph = p.get_text()
+                first_paragraph = re.sub(r"\[\d+\]", "", first_paragraph)
+                first_paragraph = re.sub(r"\[\w+\]", "", first_paragraph)
+                first_paragraph = re.sub(r"\[.+\]", "", first_paragraph)
+                first_paragraph = re.sub("Écouter", "", first_paragraph)
+                first_paragraph = re.sub("ⓘ", "", first_paragraph)
+                first_paragraph = re.sub(r"\/.+\/", "", first_paragraph)
+                first_paragraph = re.sub(r"\(.+\;", "(", first_paragraph)
+                print(first_paragraph)
+                break
 
 def get_leaders():
     with Session() as session:
