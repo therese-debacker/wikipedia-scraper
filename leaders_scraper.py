@@ -40,13 +40,21 @@ def get_first_paragraph(wikipedia_url, session: Session):
             # But disgarding if it's a particular div (in FR pages, there are some p using the name before the correct paragraph)
             if not p.find_parent("div", class_="bandeau-cell"):                
                 first_paragraph = p.get_text()
-                # using some regex to clean the paragraphs : removing [number], [words], [all other combinations], Ecouter, ⓘ and content between // (phonetic info)
+                # using some regex to clean the paragraphs : removing [number], [words], [all other combinations], Ecouter, uitspraak, ⓘ and phonetic info
+                first_paragraph = re.sub(r"\b[A-Z]+-[a-z]+(?:-[a-z]+)*;\b", "", first_paragraph)
                 first_paragraph = re.sub(r"\[\d+\]", "", first_paragraph)
                 first_paragraph = re.sub(r"\[\w+\]", "", first_paragraph)
                 first_paragraph = re.sub(r"\[.+\]", "", first_paragraph)
+                first_paragraph = re.sub(r"\(Écouter\)", "", first_paragraph)
+                first_paragraph = re.sub(r"\( Écouter\)", "", first_paragraph)
                 first_paragraph = re.sub("Écouter", "", first_paragraph)
+                first_paragraph = re.sub(r"\(uitspraak\)", "", first_paragraph)
+                first_paragraph = re.sub("uitspraak", "", first_paragraph)
                 first_paragraph = re.sub("ⓘ", "", first_paragraph)
                 first_paragraph = re.sub(r"\/.+\/", "", first_paragraph)
+                first_paragraph = re.sub(r"\(\s\)", "", first_paragraph)
+                first_paragraph = re.sub(r"\(\s;\s\)", "", first_paragraph)
+                first_paragraph = re.sub(r"\(\)", "", first_paragraph)
                 print(first_paragraph)
                 break
 
@@ -93,5 +101,5 @@ def save(json_filename):
     with open("leaders.json", "w") as outfile: 
         json.dump(json_filename, outfile)
 
-# Calling teh function to have our dictionary saved in a json file 
+# Calling the function to have our dictionary saved in a json file 
 save(leaders_per_country)
