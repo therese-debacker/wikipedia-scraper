@@ -30,33 +30,33 @@ def get_first_paragraph(wikipedia_url, session: Session):
     # We extract the HTML content from the url and store it in a variable
     wiki_content = session.get(wikipedia_url)
     html_content = BeautifulSoup(wiki_content.text, 'html.parser')
-    # We find the h1 (there should be only one h1 but to make sure I added one class) and we take the first word that we store in a variable
-    name = html_content.find("h1", class_="firstHeading").text[0]
     # Saving all the p from the page in a variable
     paragraphs = html_content.find_all('p')
-    # Searching for the 1st p using the word contained in name
+    # Searching for the 1st with a b tag
     for p in paragraphs:
-        if p.get_text().__contains__(name):
-            # But disgarding if it's a particular div (in FR pages, there are some p using the name before the correct paragraph)
-            if not p.find_parent("div", class_="bandeau-cell"):                
-                first_paragraph = p.get_text()
-                # using some regex to clean the paragraphs : removing [number], [words], [all other combinations], Ecouter, uitspraak, ⓘ and phonetic info
-                first_paragraph = re.sub(r"\b[A-Z]+-[a-z]+(?:-[a-z]+)*;\b", "", first_paragraph)
-                first_paragraph = re.sub(r"\[\d+\]", "", first_paragraph)
-                first_paragraph = re.sub(r"\[\w+\]", "", first_paragraph)
-                first_paragraph = re.sub(r"\[.+\]", "", first_paragraph)
-                first_paragraph = re.sub(r"\(Écouter\)", "", first_paragraph)
-                first_paragraph = re.sub(r"\( Écouter\)", "", first_paragraph)
-                first_paragraph = re.sub("Écouter", "", first_paragraph)
-                first_paragraph = re.sub(r"\(uitspraak\)", "", first_paragraph)
-                first_paragraph = re.sub("uitspraak", "", first_paragraph)
-                first_paragraph = re.sub("ⓘ", "", first_paragraph)
-                first_paragraph = re.sub(r"\/.+\/", "", first_paragraph)
-                first_paragraph = re.sub(r"\(\s\)", "", first_paragraph)
-                first_paragraph = re.sub(r"\(\s;\s\)", "", first_paragraph)
-                first_paragraph = re.sub(r"\(\)", "", first_paragraph)
-                print(first_paragraph)
-                break
+        if p.find("b"):
+            # But disgarding if it's a particular div (in FR pages, there are some p using the name before the correct paragraph and avoiding issues on some other pages)
+            if not p.find_parent("div", class_="bandeau-cell"):
+                if not p.find_parent("td", class_="sidebar-content"):
+                    if not p.find_parent("table", class_="infobox"):                
+                        first_paragraph = p.get_text()
+                        # using some regex to clean the paragraphs : removing [number], [words], [all other combinations], Ecouter, uitspraak, ⓘ and content between // (phonetic info)
+                        first_paragraph = re.sub(r"\b[A-Z]+-[a-zə]+(?:-[a-zə]+)*;\b", "", first_paragraph)
+                        first_paragraph = re.sub(r"\[\d+\]", "", first_paragraph)
+                        first_paragraph = re.sub(r"\[\w+\]", "", first_paragraph)
+                        first_paragraph = re.sub(r"\[.+\]", "", first_paragraph)
+                        first_paragraph = re.sub(r"\(Écouter\)", "", first_paragraph)
+                        first_paragraph = re.sub(r"\( Écouter\)", "", first_paragraph)
+                        first_paragraph = re.sub("Écouter", "", first_paragraph)
+                        first_paragraph = re.sub(r"\(uitspraak\)", "", first_paragraph)
+                        first_paragraph = re.sub("uitspraak", "", first_paragraph)
+                        first_paragraph = re.sub("ⓘ", "", first_paragraph)
+                        first_paragraph = re.sub(r"\/.+\/", "", first_paragraph)
+                        first_paragraph = re.sub(r"\(\s\)", "", first_paragraph)
+                        first_paragraph = re.sub(r"\(\s;\s\)", "", first_paragraph)
+                        first_paragraph = re.sub(r"\(\)", "", first_paragraph)
+                        print(first_paragraph)
+                        break
 
 # Getting the wikipedia urls
 def get_leaders():
